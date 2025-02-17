@@ -15,6 +15,7 @@ export interface IStorage {
   createScan(userId: number, scan: InsertScan, results: any): Promise<Scan>;
   getUserScans(userId: number): Promise<Scan[]>;
   getScan(id: number): Promise<Scan | undefined>;
+  getLatestScanByUrl(url: string): Promise<Scan | undefined>;
   sessionStore: session.Store;
 }
 
@@ -68,6 +69,16 @@ export class DatabaseStorage implements IStorage {
 
   async getScan(id: number): Promise<Scan | undefined> {
     const [scan] = await db.select().from(scans).where(eq(scans.id, id));
+    return scan;
+  }
+
+  async getLatestScanByUrl(url: string): Promise<Scan | undefined> {
+    const [scan] = await db
+      .select()
+      .from(scans)
+      .where(eq(scans.url, url))
+      .orderBy(scans.createdAt, "desc")
+      .limit(1);
     return scan;
   }
 }

@@ -49,6 +49,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(scan);
   });
 
+  app.get("/api/scans/url/:url", async (req, res) => {
+    const url = decodeURIComponent(req.params.url);
+    const scan = await storage.getLatestScanByUrl(url);
+
+    if (!scan) {
+      return res.sendStatus(404);
+    }
+
+    res.json(scan);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

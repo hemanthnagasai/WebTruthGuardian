@@ -15,6 +15,7 @@ import {
   Search
 } from "lucide-react";
 import { type Scan } from "@shared/schema";
+import { ShareBadge } from "@/components/share-badge";
 
 export default function ScanResults() {
   const [, params] = useRoute("/scan/:id");
@@ -222,6 +223,13 @@ export default function ScanResults() {
               )}
             </CardContent>
           </Card>
+          <div className="col-span-2">
+            <ShareBadge
+              url={scan.url}
+              isPhishing={scan.isPhishing}
+              riskScore={scan.riskScore}
+            />
+          </div>
         </div>
       </div>
     </div>

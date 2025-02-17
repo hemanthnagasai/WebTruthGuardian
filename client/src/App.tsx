@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import ScanResults from "@/pages/scan-results";
+import BadgePage from "@/pages/badge-page";
 import { ProtectedRoute } from "./lib/protected-route";
 
 function Router() {
@@ -15,6 +16,7 @@ function Router() {
       <ProtectedRoute path="/" component={HomePage} />
       <ProtectedRoute path="/scan/:id" component={ScanResults} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/badge/:url" component={BadgePage} />
       <Route component={NotFound} />
     </Switch>
   );
