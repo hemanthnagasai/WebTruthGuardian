@@ -1,8 +1,12 @@
 import { User, InsertUser, Scan, InsertScan } from "@shared/schema";
+import { users, scans } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import session from "express-session";
-import createMemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
 
-const MemoryStore = createMemoryStore(session);
+const PostgresStore = connectPg(session);
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -14,64 +18,58 @@ export interface IStorage {
   sessionStore: session.Store;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private scans: Map<number, Scan>;
-  private currentUserId: number;
-  private currentScanId: number;
+export class DatabaseStorage implements IStorage {
   readonly sessionStore: session.Store;
 
   constructor() {
-    this.users = new Map();
-    this.scans = new Map();
-    this.currentUserId = 1;
-    this.currentScanId = 1;
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000,
+    this.sessionStore = new PostgresStore({
+      pool,
+      createTableIfMissing: true,
     });
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   async createScan(userId: number, scanData: InsertScan, results: any): Promise<Scan> {
-    const id = this.currentScanId++;
-    const scan: Scan = {
-      id,
-      userId,
-      url: scanData.url,
-      riskScore: results.riskScore,
-      isPhishing: results.isPhishing,
-      createdAt: new Date(),
-      features: JSON.stringify(results.features),
-    };
-    this.scans.set(id, scan);
+    const [scan] = await db
+      .insert(scans)
+      .values({
+        userId,
+        url: scanData.url,
+        riskScore: results.riskScore,
+        isPhishing: results.isPhishing,
+        features: JSON.stringify(results.features),
+        createdAt: new Date(),
+      })
+      .returning();
     return scan;
   }
 
   async getUserScans(userId: number): Promise<Scan[]> {
-    return Array.from(this.scans.values()).filter(
-      (scan) => scan.userId === userId,
-    );
+    return db
+      .select()
+      .from(scans)
+      .where(eq(scans.userId, userId))
+      .orderBy(scans.createdAt);
   }
 
   async getScan(id: number): Promise<Scan | undefined> {
-    return this.scans.get(id);
+    const [scan] = await db.select().from(scans).where(eq(scans.id, id));
+    return scan;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
