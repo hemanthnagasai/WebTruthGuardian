@@ -115,16 +115,16 @@ export default function ScanResults() {
                     <p className="text-sm text-muted-foreground">Security Vendors</p>
                     <div className="flex items-center gap-2">
                       <span className="font-medium">
-                        {features.virusTotal.stats.malicious} Malicious
+                        {features.virusTotal?.stats?.malicious || 0} Malicious
                       </span>
-                      {features.virusTotal.stats.malicious > 0 && (
+                      {(features.virusTotal?.stats?.malicious || 0) > 0 && (
                         <AlertTriangle className="h-4 w-4 text-destructive" />
                       )}
                     </div>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Reputation</p>
-                    <span className="font-medium">{features.virusTotal.reputation}</span>
+                    <span className="font-medium">{features.virusTotal?.reputation || 0}</span>
                   </div>
                 </div>
               </div>
@@ -135,7 +135,7 @@ export default function ScanResults() {
                   <Globe className="h-5 w-5" />
                   <h3 className="font-medium">Google Safe Browsing</h3>
                 </div>
-                {features.safeBrowsing.threats.length > 0 ? (
+                {features.safeBrowsing?.threats?.length > 0 ? (
                   <div>
                     <Badge variant="destructive" className="mb-2">
                       Threats Detected
@@ -172,12 +172,12 @@ export default function ScanResults() {
                     <div>
                       <h3 className="font-medium">SSL Certificate</h3>
                       <p className="text-sm text-muted-foreground">
-                        {features.sslCertificate.valid ? features.sslCertificate.issuer : 'No valid certificate'}
+                        {features.sslCertificate?.valid ? features.sslCertificate?.issuer : 'No valid certificate'}
                       </p>
                     </div>
                   </div>
-                  <Badge variant={features.sslCertificate.valid ? "default" : "destructive"}>
-                    {features.sslCertificate.valid ? "Valid" : "Invalid"}
+                  <Badge variant={features.sslCertificate?.valid ? "default" : "destructive"}>
+                    {features.sslCertificate?.valid ? "Valid" : "Invalid"}
                   </Badge>
                 </div>
               </div>
@@ -188,7 +188,7 @@ export default function ScanResults() {
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">HTTP Strict Transport Security</span>
-                    {features.securityHeaders.hasHSTS ? (
+                    {features.securityHeaders?.hasHSTS ? (
                       <CheckCircle2 className="h-4 w-4 text-green-500" />
                     ) : (
                       <XCircle className="h-4 w-4 text-destructive" />
@@ -196,7 +196,7 @@ export default function ScanResults() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Content Security Policy</span>
-                    {features.securityHeaders.hasCSP ? (
+                    {features.securityHeaders?.hasCSP ? (
                       <CheckCircle2 className="h-4 w-4 text-green-500" />
                     ) : (
                       <XCircle className="h-4 w-4 text-destructive" />
@@ -204,7 +204,7 @@ export default function ScanResults() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">X-Frame-Options</span>
-                    {features.securityHeaders.hasXFrame ? (
+                    {features.securityHeaders?.hasXFrame ? (
                       <CheckCircle2 className="h-4 w-4 text-green-500" />
                     ) : (
                       <XCircle className="h-4 w-4 text-destructive" />
@@ -217,31 +217,31 @@ export default function ScanResults() {
               <div className="space-y-2 pt-4 border-t">
                 <h3 className="font-medium mb-3">Phishing Detection</h3>
                 <div className="grid gap-2">
-                  {features.phishingPatterns.hasSuspiciousQuery && (
+                  {features.phishingPatterns?.hasSuspiciousQuery && (
                     <div className="flex items-center gap-2 text-destructive">
                       <AlertTriangle className="h-4 w-4" />
                       <span className="text-sm">Suspicious query parameters detected</span>
                     </div>
                   )}
-                  {features.phishingPatterns.hasMaliciousKeywords && (
+                  {features.phishingPatterns?.hasMaliciousKeywords && (
                     <div className="flex items-center gap-2 text-destructive">
                       <AlertTriangle className="h-4 w-4" />
                       <span className="text-sm">Suspicious keywords in domain</span>
                     </div>
                   )}
-                  {features.phishingPatterns.hasEncodedCharacters && (
+                  {features.phishingPatterns?.hasEncodedCharacters && (
                     <div className="flex items-center gap-2 text-destructive">
                       <AlertTriangle className="h-4 w-4" />
                       <span className="text-sm">Encoded characters in URL</span>
                     </div>
                   )}
-                  {features.phishingPatterns.hasIpAddress && (
+                  {features.phishingPatterns?.hasIpAddress && (
                     <div className="flex items-center gap-2 text-destructive">
                       <AlertTriangle className="h-4 w-4" />
                       <span className="text-sm">IP address used instead of domain name</span>
                     </div>
                   )}
-                  {!Object.values(features.phishingPatterns).some(Boolean) && (
+                  {!Object.values(features.phishingPatterns || {}).some(Boolean) && (
                     <div className="flex items-center gap-2 text-green-500">
                       <CheckCircle2 className="h-4 w-4" />
                       <span className="text-sm">No suspicious patterns detected</span>
