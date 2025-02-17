@@ -8,6 +8,26 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased bg-gradient-to-br from-background to-muted text-foreground min-h-screen;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-lg border-white/20 shadow-lg;
+  }
+
+  .glass-card-dark {
+    @apply bg-black/40 backdrop-blur-lg border-white/10 shadow-lg;
+  }
+
+  .bold-heading {
+    @apply text-2xl font-bold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .animate-in {
+    @apply transition-all duration-300 ease-in-out;
   }
 }
