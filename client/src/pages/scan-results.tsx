@@ -12,7 +12,8 @@ import {
   XCircle, 
   AlertTriangle,
   Globe,
-  Search
+  Search,
+  Lock
 } from "lucide-react";
 import { type Scan } from "@shared/schema";
 import { ShareBadge } from "@/components/share-badge";
@@ -63,6 +64,7 @@ export default function ScanResults() {
         </Button>
 
         <div className="grid gap-8 md:grid-cols-2">
+          {/* Risk Score Card */}
           <Card>
             <CardHeader>
               <CardTitle>Scan Results</CardTitle>
@@ -156,56 +158,95 @@ export default function ScanResults() {
             </CardContent>
           </Card>
 
+          {/* Enhanced Security Features Card */}
           <Card>
             <CardHeader>
               <CardTitle>Security Features</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4">
+            <CardContent className="space-y-6">
+              {/* SSL Certificate */}
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {features.hasHttps ? (
-                      <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    <Lock className="h-5 w-5" />
+                    <div>
+                      <h3 className="font-medium">SSL Certificate</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {features.sslCertificate.valid ? features.sslCertificate.issuer : 'No valid certificate'}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant={features.sslCertificate.valid ? "default" : "destructive"}>
+                    {features.sslCertificate.valid ? "Valid" : "Invalid"}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Security Headers */}
+              <div className="space-y-2 pt-4 border-t">
+                <h3 className="font-medium mb-3">Security Headers</h3>
+                <div className="grid gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">HTTP Strict Transport Security</span>
+                    {features.securityHeaders.hasHSTS ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
                     ) : (
-                      <AlertTriangle className="h-5 w-5 text-destructive" />
+                      <XCircle className="h-4 w-4 text-destructive" />
                     )}
-                    <span>HTTPS Encryption</span>
                   </div>
-                  <Badge variant={features.hasHttps ? "default" : "destructive"}>
-                    {features.hasHttps ? "Secure" : "Not Secure"}
-                  </Badge>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {features.suspiciousUrl ? (
-                      <AlertTriangle className="h-5 w-5 text-destructive" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Content Security Policy</span>
+                    {features.securityHeaders.hasCSP ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
                     ) : (
-                      <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      <XCircle className="h-4 w-4 text-destructive" />
                     )}
-                    <span>Domain Assessment</span>
                   </div>
-                  <Badge variant={features.suspiciousUrl ? "destructive" : "default"}>
-                    {features.suspiciousUrl ? "Suspicious" : "Clean"}
-                  </Badge>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">X-Frame-Options</span>
+                    {features.securityHeaders.hasXFrame ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-destructive" />
+                    )}
+                  </div>
                 </div>
+              </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span>Domain Age</span>
-                  </div>
-                  <Badge variant="secondary">
-                    {features.domainAge}
-                  </Badge>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span>Redirect Count</span>
-                  </div>
-                  <Badge variant="secondary">
-                    {features.redirectCount}
-                  </Badge>
+              {/* Phishing Detection */}
+              <div className="space-y-2 pt-4 border-t">
+                <h3 className="font-medium mb-3">Phishing Detection</h3>
+                <div className="grid gap-2">
+                  {features.phishingPatterns.hasSuspiciousQuery && (
+                    <div className="flex items-center gap-2 text-destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span className="text-sm">Suspicious query parameters detected</span>
+                    </div>
+                  )}
+                  {features.phishingPatterns.hasMaliciousKeywords && (
+                    <div className="flex items-center gap-2 text-destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span className="text-sm">Suspicious keywords in domain</span>
+                    </div>
+                  )}
+                  {features.phishingPatterns.hasEncodedCharacters && (
+                    <div className="flex items-center gap-2 text-destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span className="text-sm">Encoded characters in URL</span>
+                    </div>
+                  )}
+                  {features.phishingPatterns.hasIpAddress && (
+                    <div className="flex items-center gap-2 text-destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span className="text-sm">IP address used instead of domain name</span>
+                    </div>
+                  )}
+                  {!Object.values(features.phishingPatterns).some(Boolean) && (
+                    <div className="flex items-center gap-2 text-green-500">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span className="text-sm">No suspicious patterns detected</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -223,6 +264,7 @@ export default function ScanResults() {
               )}
             </CardContent>
           </Card>
+
           <div className="col-span-2">
             <ShareBadge
               url={scan.url}
